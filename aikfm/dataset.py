@@ -14,14 +14,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 from dataclasses import dataclass
+from math import max, min
 from typing import Any, Callable, Dict, List, Optional
-from unicodedata import name
 
 import numpy as np
 import torch
 from PIL import Image
 from roifile import ImagejRoi
-from sklearn import datasets
 from torchvision.datasets import VisionDataset
 
 
@@ -29,6 +28,7 @@ class AikfmDataset(VisionDataset):
 
     def __init__(self, root: str,
                  sample : str = None,
+                 keep_positive : bool = True,
                  transforms: Optional[Callable] = None,
                  transform: Optional[Callable] = None,
                  target_transform: Optional[Callable] = None) -> None:
@@ -42,6 +42,7 @@ class AikfmDataset(VisionDataset):
 
         self.train_data = None
         self.test_data = None
+        self.keep_positive = keep_positive
         self.sample_data_ : Dict[str, List[List[int]]] = {}
         self.img_samples_ : List[str] = []
         data_path_suffix_ = "Training/Training"
@@ -77,18 +78,30 @@ class AikfmDataset(VisionDataset):
                         coords = [roi.left, roi.right, roi.top, roi.bottom]
                         self.sample_data_[sample + "/images/" + _path] += [coords]
 
+            img_samples__ = []
+            for key, value in self.sample_data_.items():
+                if (value.__len__()):
+                    img_samples__ += [key]
+
+            self.img_samples_ = img_samples__
+
     def __getitem__(self,
                     idx: int) -> Any:
         name_ = self.img_samples_[idx]
         img_path = os.path.join(self.train_data_path, name_ + '.png')
-        img = np.asarray(Image.open(img_path), dtype=np.float32)
-
-        print(name_, self.sample_data_[name_])
+        img = np.asarray(Image.open(img_path), dtype=np.float32)/255.
+        img = torch.as_tensor(img, dtype=torch.float32)
 
         bboxs = torch.as_tensor(self.sample_data_[name_], dtype=torch.float32)
         img_mask = torch.zeros(img.shape, dtype=torch.uint8)
         for box in self.sample_data_[name_]:
             img_mask[box[2]:box[3], box[0]:box[1]] = 1.
+
+        # h, w, _ = img.shape
+        # bbox_crop = [max(np.min(self.sample_data_[:, 0]), 0),
+        #              min(np.max(self.sample_data_[:, 1]), w),
+        #              max(np.min(self.sample_data_[:, 2]), 0),
+        #              min(np.max(self.sample_data_[:, 3]), h)]
 
         target = {}
         target["bboxs"] = bboxs
