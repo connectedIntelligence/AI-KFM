@@ -20,6 +20,11 @@ setup(
     keywords = "DeepLearning Pytorch AI-KFM",
     url = "https://github.com/connectedIntelligence/AI-KFM.git",
     packages=['aikfm'],
+    install_requires=[
+        'roifile',
+        'pillow',
+        'pytorch'
+    ],
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: Alpha",
