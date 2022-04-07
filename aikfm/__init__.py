@@ -13,3 +13,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 from .dataset import AikfmDataset
+from .models import *

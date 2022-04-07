@@ -19,7 +19,7 @@ setup(
     license = "AGPLv3",
     keywords = "DeepLearning Pytorch AI-KFM",
     url = "https://github.com/connectedIntelligence/AI-KFM.git",
-    packages=['aikfm'],
+    packages=['aikfm', 'aikfm.models'],
     install_requires=[
         'roifile',
         'pillow',
