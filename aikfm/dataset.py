@@ -13,8 +13,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import os
-from dataclasses import dataclass
-from math import max, min
 from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
@@ -92,8 +90,8 @@ class AikfmDataset(VisionDataset):
         img = np.asarray(Image.open(img_path), dtype=np.float32)/255.
         img = torch.as_tensor(img, dtype=torch.float32)
 
-        bboxs = torch.as_tensor(self.sample_data_[name_], dtype=torch.float32)
-        img_mask = torch.zeros(img.shape, dtype=torch.uint8)
+        # bboxs = torch.as_tensor(self.sample_data_[name_], dtype=torch.float32)
+        img_mask = torch.zeros(img.shape[0], img.shape[1], 1, dtype=torch.uint8)
         for box in self.sample_data_[name_]:
             img_mask[box[2]:box[3], box[0]:box[1]] = 1.
 
@@ -103,9 +101,10 @@ class AikfmDataset(VisionDataset):
         #              max(np.min(self.sample_data_[:, 2]), 0),
         #              min(np.max(self.sample_data_[:, 3]), h)]
 
-        target = {}
-        target["bboxs"] = bboxs
-        target["mask"] = img_mask
+        img_mask = torch.permute(img_mask, dims=(2, 0, 1))
+        img = torch.permute(img, dims=(2, 0, 1))
+
+        target = img_mask
 
         if self.transform is not None:
             img, target = self.transform(img, target)
