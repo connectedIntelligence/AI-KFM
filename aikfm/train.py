@@ -31,7 +31,7 @@ if __name__ == "__main__":
     parser.add_argument("data_root", type=str, help="Data root directory, with Training and Test directories.")
     parser.add_argument("--epochs", default=30, type=int, help="Max number of epochs the training should be performed.")
     parser.add_argument("--batch_size", default=20, type=int, help="Mini-batch size to train the model.")
-    parser.add_argument("--lambad1", default=100.0, type=float)
+    parser.add_argument("--lambda1", default=100.0, type=float)
     parser.add_argument("--lambda2", default=10.0, type=float)
     parser.add_argument("--results_dir", default=os.path.join(os.getenv('HOME'), 'ai-kfm-results'), type=str)
 
