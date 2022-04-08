@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict, List, Optional
 import numpy as np
 import torch
 from PIL import Image
+from rdflib import Dataset
 from roifile import ImagejRoi
 from torchvision.datasets import VisionDataset
 
@@ -113,6 +114,35 @@ class AikfmDataset(VisionDataset):
 
     def __len__(self) -> int:
         return self.img_samples_.__len__()
+
+class AikfmDatasetInference(VisionDataset):
+
+    def __init__(self, root: str,
+                 transforms: Optional[Callable] = None,
+                 transform: Optional[Callable] = None,
+                 target_transform: Optional[Callable] = None):
+        super().__init__(root, transforms, transform, target_transform)
+
+        self._test_dir = os.path.join(self.root, 'Test/Test/images')
+        self.images : List[str] = [os.path.join(self._test_dir, img_name) for img_name in os.listdir(self._test_dir)]
+
+    def __getitem__(self, index: int) -> Any:
+        img_path = self.images[index]
+
+        img = np.asarray(Image.open(img_path), dtype=np.float32)/255.
+        img = torch.as_tensor(img, dtype=torch.float32)
+
+        target = img_path[index].split('/')[-1][:-4]
+
+        img = img.permute(dims=(2, 0, 1))
+
+        if self.transform is not None:
+            img, target = self.transform(img, target)
+
+        return img, target
+
+    def __len__(self) -> int:
+        return self.images.__len__()
 
 if __name__ == "__main__":
     # Run tests here
