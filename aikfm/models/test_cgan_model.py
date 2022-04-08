@@ -35,6 +35,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    num_of_gpus = torch.cuda.device_count()
+    print(f'Available GPUs : {num_of_gpus}')
+
     mini_batch_size = args.batch_size
     lambda1 = args.lambda1
     lambda2 = args.lambda2
