@@ -77,6 +77,7 @@ if __name__ == "__main__":
 
     ###############################
     # Train the discriminator first
+    print('Training the discriminator')
     dis.train()
     g1.eval()
     g2.eval()
@@ -87,18 +88,23 @@ if __name__ == "__main__":
     # Get generator outputs
     g1_out = g1(imgs) # [B, 1, 1200, 1600]
     g1_out = torch.clamp(g1_out, 0.0, 1.0)
+    print(f'Generator1 output shape : {g1_out.shape}')
 
     g2_out = g2(imgs) # [B, 1, 1200, 1600]
     g2_out = torch.clamp(g2_out, 0.0, 1.0)
+    print(f'Generator2 output shape : {g2_out.shape}')
 
     pos1 = torch.cat([imgs, 2 * masks - 1], dim = 1) # [B, 4, H, W]
     neg1 = torch.cat([imgs, 2 * g1_out - 1], dim = 1) # [B, 4, H, W]
     neg2 = torch.cat([imgs, 2 * g2_out - 1], dim = 1) # [B, 4, H, W]
 
     dis_input = torch.cat([pos1, neg1, neg2], dim=0) # # [3*B, 4, H, W]
+    print(f'Pos 1 : {pos1.shape}, Neg 1 : {neg1.shape}, Neg 2 : {neg2.shape}')
+    print(f'Discriminator Input : {dis_input.shape}')
 
     # Get discriminator output
     logits_real, logits_fake1, logits_fake2, Lgc = dis(dis_input)
+    print(f'Discriminator output shapes : {logits_real.shape} \t {logits_fake1.shape} \t {logits_fake2.shape} \t {Lgc.shape}')
 
     const1 = torch.ones(imgs.size(0), 1, device=device, dtype=torch.float32)
     const0 = torch.zeros(imgs.size(0), 1, device=device, dtype=torch.float32)
