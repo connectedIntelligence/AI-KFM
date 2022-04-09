@@ -18,7 +18,6 @@ from typing import Any, Callable, Dict, List, Optional
 import numpy as np
 import torch
 from PIL import Image
-from rdflib import Dataset
 from roifile import ImagejRoi
 from torchvision.datasets import VisionDataset
 
