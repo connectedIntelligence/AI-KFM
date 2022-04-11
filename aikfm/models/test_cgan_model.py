@@ -46,18 +46,22 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=mini_batch_size, shuffle=True, num_workers=4)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    gen1_device = torch.device('cuda:0')
+    gen2_device = torch.device('cuda:1')
+    dis_device = torch.device('cuda:0')
+    loss_compute_device = torch.device('cpu')
 
     # Generater 1
-    g1 = nn.DataParallel(CAN8())
-    g1.to(device)
+    g1 = CAN8()
+    g1.to(gen1_device)
 
     # Generator 2
-    g2 = nn.DataParallel(UCAN64())
-    g2.to(device)
+    g2 = UCAN64()
+    g2.to(gen2_device)
 
     # Discriminator
-    dis = nn.DataParallel(discriminator())
-    dis.to(device)
+    dis = discriminator()
+    dis.to(dis_device)
 
     # Define optimizers
     optim_g1 = optim.AdamW(g1.parameters(), lr=1e-4, weight_decay=1e-5)
