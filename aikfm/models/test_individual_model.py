@@ -21,8 +21,6 @@ if __name__ == "__main__":
     print(f'Available GPUs : {num_of_gpus}')
 
     mini_batch_size = args.batch_size
-    lambda1 = args.lambda1
-    lambda2 = args.lambda2
 
     dataset = AikfmDataset(args.data_root)
     dataloader = DataLoader(dataset, batch_size=mini_batch_size, shuffle=True, num_workers=4)
@@ -33,5 +31,5 @@ if __name__ == "__main__":
     g1 = CAN8()
     g1.to(device)
 
-    print(summary(g1, (1, 1200, 1600)))
+    print(summary(g1, (3, 1200, 1600)))
     print(torch.cuda.memory_summary())
