@@ -41,11 +41,11 @@ class discriminator(nn.Module):
         self.fc4 = nn.Linear(64, 3)
 
 
-    def forward(self, input_images): # 输入[3B, 4, 1200, 1600],输出[B, 1, 1200, 1600]
+    def forward(self, input_images): # Input[3B, 4, 600, 600], Output[B, 1, 600, 600]
         mini_batch_size = input_images.size(0)/3 # Batch size
         net = F.interpolate(input_images, size=(self.init_size, self.init_size), mode='bilinear')
-        net = F.max_pool2d(input_images, kernel_size=[2, 2])  # [3B, 4, 100, 100]
-        net = F.max_pool2d(net, kernel_size=[2, 2])  # [3B, 4, 50, 50]
+        net = F.max_pool2d(net, kernel_size=[2, 2])  # [3B, 4, 300, 300]
+        net = F.max_pool2d(net, kernel_size=[2, 2])  # [3B, 4, 150, 150]
 
         net = self.d_conv1(net)
         net = self.d_bn1(net)
@@ -61,8 +61,9 @@ class discriminator(nn.Module):
 
         net = self.d_conv4(net)
         net = self.d_bn4(net)
-        net1 = self.leakyrelu4(net) # [3B, 1, 50, 50]
+        net1 = self.leakyrelu4(net) # [3B, 1, 150, 150]
 
+# Continue here
         net = net1.view(-1, 2500) # [3B, 2500]
         net = self.fc1(net)      # [3B, 256]
         net = net.unsqueeze(2).unsqueeze(3) # [3B, 256, 1, 1]

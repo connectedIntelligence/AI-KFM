@@ -13,12 +13,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import os
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 from PIL import Image
 from roifile import ImagejRoi
+from torch.nn.functional import interpolate
 from torchvision.datasets import VisionDataset
 
 
@@ -29,7 +30,8 @@ class AikfmDataset(VisionDataset):
                  keep_positive : bool = True,
                  transforms: Optional[Callable] = None,
                  transform: Optional[Callable] = None,
-                 target_transform: Optional[Callable] = None) -> None:
+                 target_transform: Optional[Callable] = None,
+                 img_size: Tuple[int, int] = (600, 600)) -> None:
         super().__init__(root, transforms, transform, target_transform)
 
         self.n_samples = 7
@@ -41,6 +43,7 @@ class AikfmDataset(VisionDataset):
         self.train_data = None
         self.test_data = None
         self.keep_positive = keep_positive
+        self.img_size = img_size
         self.sample_data_ : Dict[str, List[List[int]]] = {}
         self.img_samples_ : List[str] = []
         data_path_suffix_ = "Training/Training"
@@ -90,21 +93,17 @@ class AikfmDataset(VisionDataset):
         img = np.asarray(Image.open(img_path), dtype=np.float32)/255.
         img = torch.as_tensor(img, dtype=torch.float32)
 
-        # bboxs = torch.as_tensor(self.sample_data_[name_], dtype=torch.float32)
         img_mask = torch.zeros(img.shape[0], img.shape[1], 1, dtype=torch.uint8)
         for box in self.sample_data_[name_]:
             img_mask[box[2]:box[3], box[0]:box[1]] = 1.
-
-        # h, w, _ = img.shape
-        # bbox_crop = [max(np.min(self.sample_data_[:, 0]), 0),
-        #              min(np.max(self.sample_data_[:, 1]), w),
-        #              max(np.min(self.sample_data_[:, 2]), 0),
-        #              min(np.max(self.sample_data_[:, 3]), h)]
 
         img_mask = torch.permute(img_mask, dims=(2, 0, 1))
         img = torch.permute(img, dims=(2, 0, 1))
 
         target = img_mask
+
+        img = interpolate(img.unsqueeze(dim=0), self.img_size, mode='bilinear').squeeze(dim=0)
+        target = interpolate(target.unsqueeze(dim=0), self.img_size, mode='bilinear').squeeze(dim=0)
 
         if self.transform is not None:
             img, target = self.transform(img, target)

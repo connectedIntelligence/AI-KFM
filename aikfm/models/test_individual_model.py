@@ -31,5 +31,5 @@ if __name__ == "__main__":
     g1 = CAN8()
     g1.to(device)
 
-    print(summary(g1, (3, 1200, 1600)))
+    print(summary(g1, (3, 600, 600)))
     print(torch.cuda.memory_summary())

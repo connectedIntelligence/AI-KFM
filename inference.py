@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+from torch.nn.functional import interpolate
 from torch.utils.data import DataLoader
 
 from aikfm.dataset import AikfmDatasetInference
@@ -22,6 +23,7 @@ if __name__ == "__main__":
 
 
     args = parser.parse_args()
+    result_img_size = (1200, 1600)
 
     mini_batch_size = args.batch_size
     results_file = os.path.join(args.results_dir, args.results_file)
@@ -59,6 +61,7 @@ if __name__ == "__main__":
         g2_out = torch.clamp(g2_out, 0.0, 1.0)
 
         masks = (g1_out + g2_out)/2.0 # average of 2 generators
+        masks = interpolate(masks, result_img_size, mode='bicubic')
         masks = masks.squeeze(dim=1).permute(0, 2, 1).flatten(start_dim=1)
         masks = masks.cpu().detach().numpy() # move to cpu, and numpy
 
